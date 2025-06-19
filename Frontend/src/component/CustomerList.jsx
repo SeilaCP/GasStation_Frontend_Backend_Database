@@ -35,6 +35,7 @@ const CustomerList = () => {
           <li
             key={customer.customer_id}
             // onClick={() => handleCustomerClick(customer.customer_id)}
+            // hello
             style={{ cursor: "pointer", margin: "8px 0" }}
           >
             {customer.first_name} {customer.last_name}
