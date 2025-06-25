@@ -1,22 +1,48 @@
 // "use client"
-import { useState, useMemo } from "react"
-import { Search, ShoppingCart, Plus, Minus, History } from "lucide-react"
+import { useState, useMemo, useEffect } from "react"
+import { Search, ShoppingCart, Plus, Minus, History, Scan } from "lucide-react"
 import { products, categories } from "../services/fakeApi"
 import { Link } from 'react-router-dom';
+import BarcodeScannerComponent from 'react-qr-barcode-scanner';
+import { removeProduct } from "../services/fakeApi";
 
 export default function ProductPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("All")
+  const [selectedCategory, setSelectedCategory] = useState("")
   const [cart, setCart] = useState([])
   const [showCart, setShowCart] = useState(false)
+  
+  const [data, setData] = useState("");
+  const [scanning, setScanning] = useState(false);
+  const [filterP, Setfilter] = useState(products);
+
+  useEffect(() => {
+    Setfilter(filterBarcode);
+  }, [data]);
+  useEffect(() => {
+    setData("");
+    Setfilter(filteredProducts);
+  }, [searchTerm,selectedCategory]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesCategory = selectedCategory === "All" || product.category === selectedCategory
+      const matchesSearch = product.name
+      ? product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      : false;
+      const matchesCategory = selectedCategory === "All" || product.category === selectedCategory || selectedCategory === "";
+      const matchesBarcode = data ? product.barcode === data : true;
       return matchesSearch && matchesCategory
     })
   }, [searchTerm, selectedCategory])
+
+  const filterBarcode = useMemo(() => {
+    console.log("product", products);
+    return products.filter((product) => {
+      const matchesBarcode = data ? product.barcode === data : true;
+      return matchesBarcode
+    })
+  }, [data])
+
 
   const addToCart = (product) => {
     setCart((prevCart) => {
@@ -43,6 +69,10 @@ export default function ProductPage() {
     })
   }
 
+  const checkoutFromCart = () => {
+    removeProduct(cart);
+  }
+
   const getTotalItems = () => {
     return cart.reduce((total, item) => total + item.quantity, 0)
   }
@@ -51,6 +81,20 @@ export default function ProductPage() {
     return cart.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)
   }
 
+  const handleUpdate = (err, result) => {
+    if (result) {
+      setData(result.text);
+      setScanning(false); // Stop scanning after a successful read
+    } else {
+      setData('No barcode detected');
+    }
+  };
+  const handleError = (error) => {
+    console.error("Camera error:", error);
+    if (error.name === "NotAllowedError") {
+      alert("Camera access denied. Please allow camera access to scan barcodes.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,6 +117,29 @@ export default function ProductPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 w-full"
                 />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2" onClick={() => setScanning(!scanning)}>
+                  <Scan className="h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Scan Barcode */}
+            <div className="absolute top-16 left-0 right-0 flex justify-center">
+              <div className="mb-6 relative">
+              {scanning ? (
+              <BarcodeScannerComponent
+              width={500}
+              height={500}
+              onUpdate={handleUpdate}
+              onError={handleError}
+              facingMode="environment" // Use rear camera if available, otherwise front
+              stopStream={!scanning} // Crucial for preventing browser freeze on unmount/stop
+              />
+              ) : (
+              <div>
+                <p className="text-center text-blue-600 font-semibold mt-2">{data}</p>
+              </div>
+              )}
               </div>
             </div>
 
@@ -121,7 +188,7 @@ export default function ProductPage() {
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
+              {filterP.map((product) => (
                 <div key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-square overflow-hidden">
                     <img
@@ -152,7 +219,7 @@ export default function ProductPage() {
               </div>
             )}
           </div>
-
+          
           {/* Shopping Cart Sidebar */}
           {showCart && (
             <div className="w-80">
@@ -198,7 +265,7 @@ export default function ProductPage() {
                         <div className="flex justify-between items-center mb-4">
                           <span className="font-semibold">Total: ${getTotalPrice()}</span>
                         </div>
-                        <button className="w-full bg-green-600 hover:bg-green-700 text-white px-3 py-3 rounded text-center">Clear on stock</button>
+                        <button className="w-full bg-green-600 hover:bg-green-700 text-white px-3 py-3 rounded text-center" onClick={checkoutFromCart}>Clear on stock</button>
                       </div>
                     </>
                   )}

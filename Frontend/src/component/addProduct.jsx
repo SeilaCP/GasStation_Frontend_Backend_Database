@@ -1,14 +1,37 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import { Link } from 'react-router-dom';
 import BarcodeScannerComponent from 'react-qr-barcode-scanner';
+import { createProduct } from '../services/fakeApi';
 
 export const AddProduct = () => {
     const [newProductName, setNewProductName] = useState('');
     const [newProductQuantity, setNewProductQuantity] = useState('');
     const [newProductExpDate, setNewProductExpDate] = useState(''); // YYYY-MM-DD
+    const [product, setProduct] = useState({});
 
-    const [data, setData] = useState('No barcode scanned');
+    const [data, setData] = useState('');
     const [scanning, setScanning] = useState(true); // Control scanning state
+
+
+    useEffect(() => {
+        createProduct(product);
+    }, [product]);
+
+    const handleAddProduct = () => {
+        setProduct({
+            name: String(newProductName),
+            price: 2.99,
+            category: "Dairy",
+            stock: newProductQuantity,
+            barcode: String(data),
+        });
+
+        setNewProductName('');
+        setNewProductQuantity('');
+        setNewProductExpDate('');
+        setData('');
+        setScanning(false);
+    };
 
   const handleUpdate = (err, result) => {
     if (result) {
@@ -68,26 +91,23 @@ export const AddProduct = () => {
                 {/* Scan Barcode */}
                 <div className="mb-6">
                 <label htmlFor="add-product-exp-date" className="block text-gray-700 text-sm font-bold mb-2">Scan:</label>
-                {scanning ? (
-                <BarcodeScannerComponent
-                width={500}
-                height={500}
-                onUpdate={handleUpdate}
-                onError={handleError}
-                facingMode="environment" // Use rear camera if available, otherwise front
-                stopStream={!scanning} // Crucial for preventing browser freeze on unmount/stop
-                />
-                ) : (
-                <div>
-                <p>Scanned Barcode: <strong>{data}</strong></p>
-                <button onClick={() => setScanning(true)}>Scan Again</button>
-                {/* Here you would integrate with your product lookup logic */}
-                {data !== 'No barcode scanned' && data !== 'No barcode detected' && (
-                    <p>Lookup product with barcode: {data}</p>
-                    // Call an API or dispatch an action to fetch product details
-                )}
+                <div className="flex justify-center">
+                    {scanning ? (
+                    <BarcodeScannerComponent
+                    width={250}
+                    height={250}
+                    onUpdate={handleUpdate}
+                    onError={handleError}
+                    facingMode="environment" // Use rear camera if available, otherwise front
+                    stopStream={!scanning} // Crucial for preventing browser freeze on unmount/stop
+                    />
+                    ) : (
+                    <div>
+                    <p>Scanned Barcode: <strong>{data}</strong></p>
+                    <button className="bg-white rounded-xl shadow-lg p-3 w-full max-w-md hover:bg-gray-200 transition" onClick={() => setScanning(true) }>Scan Again</button>
+                    </div>
+                    )}
                 </div>
-                )}
                 </div>
 
                 <div className="flex justify-end gap-3">
@@ -101,7 +121,7 @@ export const AddProduct = () => {
                 </Link>
                 <Link to="/products">
                     <button
-                        // onClick={handleAddProduct}
+                        onClick={handleAddProduct}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
                     >
                         Add Product

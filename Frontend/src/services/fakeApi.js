@@ -6,6 +6,7 @@ export const products = [
     category: "Fruits",
     image: "../public/placeholder.jpg?height=200&width=200",
     stock: 50,
+    barcode: "705632441947",
   },
   {
     id: 2,
@@ -14,6 +15,7 @@ export const products = [
     category: "Fruits",
     image: "../public/placeholder.jpg?height=200&width=200",
     stock: 30,
+    barcode: "705632441946",
   },
   {
     id: 3,
@@ -22,6 +24,7 @@ export const products = [
     category: "Dairy",
     image: "../public/placeholder.jpg?height=200&width=200",
     stock: 25,
+    barcode: "9780194770200",
   },
   {
     id: 4,
@@ -30,64 +33,26 @@ export const products = [
     category: "Dairy",
     image: "../public/placeholder.jpg?height=200&width=200",
     stock: 20,
-  },
-  {
-    id: 5,
-    name: "Sourdough Bread",
-    price: 3.99,
-    category: "Bakery",
-    image: "../public/placeholder.jpg?height=200&width=200",
-    stock: 15,
-  },
-  {
-    id: 6,
-    name: "Croissants",
-    price: 6.99,
-    category: "Bakery",
-    image: "../public/placeholder.jpg?height=200&width=200",
-    stock: 12,
-  },
-  {
-    id: 7,
-    name: "Chicken Breast",
-    price: 8.99,
-    category: "Meat",
-    image: "../public/placeholder.jpg?height=200&width=200",
-    stock: 18,
-  },
-  {
-    id: 8,
-    name: "Ground Beef",
-    price: 7.99,
-    category: "Meat",
-    image: "../public/placeholder.jpg?height=200&width=200",
-    stock: 22,
-  },
-  {
-    id: 9,
-    name: "Fresh Spinach",
-    price: 2.49,
-    category: "Vegetables",
-    image: "../public/placeholder.jpg?height=200&width=200",
-    stock: 35,
-  },
-  {
-    id: 10,
-    name: "Bell Peppers",
-    price: 3.99,
-    category: "Vegetables",
-    image: "../public/placeholder.jpg?height=200&width=200",
-    stock: 28,
-  },
-  { id: 11, name: "Pasta", price: 1.99, category: "Pantry", image: "../public/placeholder.jpg?height=200&width=200", stock: 40 },
-  {
-    id: 12,
-    name: "Olive Oil",
-    price: 9.99,
-    category: "Pantry",
-    image: "../public/placeholder.jpg?height=200&width=200",
-    stock: 15,
+    barcode: "9789996327934",
   },
 ];
 
 export const categories = ["All", "Fruits", "Vegetables", "Dairy", "Meat", "Bakery", "Pantry"];
+
+export const createProduct = (product) => {
+  const newProduct = {
+    ...product,
+    id: products.length + 1,
+    image: "../public/placeholder.jpg?height=200&width=200", // Default image
+  };
+  products.push(newProduct);
+  return newProduct;
+}
+
+export const removeProduct = (cart) => {
+  const index = cart.map((c) => {
+    return products.findIndex((p) => c.id === p.id);
+  });
+
+  console.log(index)
+}

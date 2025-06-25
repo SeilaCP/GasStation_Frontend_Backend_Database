@@ -7,16 +7,24 @@ import {
 } from "react-router-dom";
 
 import CustomerList from "./component/CustomerList";
+import Home from "./component/homePage";
+import { Header, Footer} from "./component/ui/header";
+import ProductPage from "./component/productPage";
+import { AddProduct } from "./component/addProduct";
 
 function App() {
   return (
     <BrowserRouter>
-      <header>
-        <h1>Article App</h1>
-      </header>
+      {/* <header>
+        <Header />
+      </header> */}
       <Routes>
         <Route path="/" element={<CustomerList />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/products" element={<ProductPage />} />
+        <Route path="/add" element={<AddProduct />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }
